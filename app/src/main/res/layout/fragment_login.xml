@@ -7,7 +7,7 @@
     tools:context=".ui.login.LoginFragment">
 
     <TextView
-        android:id="@+id/etLogin"
+        android:id="@+id/tvLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Login"
@@ -30,7 +30,7 @@
         android:layout_marginTop="@dimen/_40sdp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etLogin" >
+        app:layout_constraintTop_toBottomOf="@id/tvLogin" >
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEmail"
@@ -78,6 +78,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="LOGIN"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:textColor="@color/white"
         android:textSize="@dimen/_12sdp"
         app:layout_constraintTop_toBottomOf="@id/layoutPassword"
@@ -109,5 +110,17 @@
         app:layout_constraintStart_toStartOf="@id/tvNotAMember"
         app:layout_constraintEnd_toEndOf="@id/tvNotAMember"
         app:layout_constraintTop_toBottomOf="@id/tvNotAMember"/>
+
+    <ProgressBar
+        android:id="@+id/pbLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        android:indeterminateTint="@color/btn_blue"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
