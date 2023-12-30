@@ -7,7 +7,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.example.airmovies.util.Resource
 import com.example.wheretopark.R
 import com.example.wheretopark.activities.MainActivity
@@ -31,6 +33,12 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentLoginBinding.inflate(layoutInflater, container, false)
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                requireActivity().finish()
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(callback)
         return binding.root
     }
 
@@ -38,6 +46,8 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         onLoginButtonClickListener()
         observeLogin()
+        observeValidation()
+        onRegisterNowClickListener()
     }
 
     private fun onLoginButtonClickListener() {
@@ -47,7 +57,14 @@ class LoginFragment : Fragment() {
                 val password = etPassword.text.toString()
                 viewModel.validate(email, password)
                 viewModel.login(email, password)
+                binding.pbLogin.visibility = View.VISIBLE
             }
+        }
+    }
+
+    private fun onRegisterNowClickListener() {
+        binding.tvRegister.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
         }
     }
 
@@ -77,7 +94,6 @@ class LoginFragment : Fragment() {
 
     @SuppressLint("CheckResult")
     private fun observeLogin() {
-        binding.pbLogin.visibility = View.VISIBLE
         disposable = viewModel.observeLoginRxJava()
             .subscribe(
                 {

@@ -23,66 +23,75 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layoutEmail"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_35sdp"
-        android:layout_marginStart="@dimen/_40sdp"
-        android:layout_marginEnd="@dimen/_40sdp"
-        android:layout_marginTop="@dimen/_40sdp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvLogin" >
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:boxStrokeColor="@color/btn_blue"
+        app:endIconMode="clear_text"
+        app:endIconTint="@color/gray_text"
+        app:hintTextColor="@color/btn_blue"
+        app:helperTextTextColor="@color/error_red"
+        android:layout_marginTop="@dimen/_25sdp"
+        app:layout_constraintStart_toStartOf="@id/tvLogin"
+        app:layout_constraintEnd_toEndOf="@id/tvLogin"
+        app:layout_constraintTop_toBottomOf="@id/tvLogin"
+        android:singleLine="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/custom_edit_text"
-            android:hint="Email"
+            android:layout_height="wrap_content"
+            android:hint="Login"
             android:textColorHint="@color/gray_text"
-            android:textColor="@color/gray_text"
             android:drawableStart="@drawable/ic_email"
             android:drawablePadding="@dimen/_10sdp"
-            android:drawableTint="@color/gray_text"
-            android:paddingStart="@dimen/_12sdp"/>
-
+            android:inputType="textEmailAddress"
+            android:textColor="@color/gray_text"
+            android:textCursorDrawable="@drawable/cursor_color"
+            android:singleLine="true"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layoutPassword"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_35sdp"
-        android:layout_marginStart="@dimen/_40sdp"
-        android:layout_marginEnd="@dimen/_40sdp"
-        android:layout_marginTop="@dimen/_10sdp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layoutEmail" >
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:boxStrokeColor="@color/btn_blue"
+        app:endIconMode="password_toggle"
+        app:helperTextTextColor="@color/error_red"
+        app:endIconTint="@color/gray_text"
+        app:hintTextColor="@color/btn_blue"
+        android:layout_marginTop="@dimen/_25sdp"
+        app:layout_constraintTop_toBottomOf="@id/layoutEmail"
+        app:layout_constraintStart_toStartOf="@id/layoutEmail"
+        app:layout_constraintEnd_toEndOf="@id/layoutEmail"
+        android:singleLine="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/custom_edit_text"
+            android:layout_height="wrap_content"
             android:hint="Password"
             android:textColorHint="@color/gray_text"
-            android:textColor="@color/gray_text"
             android:drawableStart="@drawable/ic_lock"
-            android:drawablePadding="@dimen/_10sdp"
             android:drawableTint="@color/gray_text"
-            android:paddingStart="@dimen/_12sdp"/>
-
+            android:drawablePadding="@dimen/_10sdp"
+            android:inputType="textPassword"
+            android:textColor="@color/gray_text"
+            android:textCursorDrawable="@drawable/cursor_color"
+            android:singleLine="true"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/_50sdp"
         android:text="LOGIN"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:textColor="@color/white"
         android:textSize="@dimen/_12sdp"
         app:layout_constraintTop_toBottomOf="@id/layoutPassword"
-        android:background="@drawable/button_color_blue"
+        android:backgroundTint="@color/btn_blue"
+        app:cornerRadius="@dimen/_16sdp"
         android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginStart="@dimen/_40sdp"
         android:layout_marginEnd="@dimen/_40sdp"
@@ -107,6 +116,7 @@
         android:layout_height="wrap_content"
         android:text="Register now"
         android:textColor="@color/btn_blue"
+        android:textSize="@dimen/_12sdp"
         app:layout_constraintStart_toStartOf="@id/tvNotAMember"
         app:layout_constraintEnd_toEndOf="@id/tvNotAMember"
         app:layout_constraintTop_toBottomOf="@id/tvNotAMember"/>

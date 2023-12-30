@@ -10,4 +10,5 @@
     <color name="button_background">#D6D5D5</color>
     <color name="gray_text">#686868</color>
     <color name="btn_blue">#12419F</color>
+    <color name="error_red">#CC0303</color>
 </resources>
