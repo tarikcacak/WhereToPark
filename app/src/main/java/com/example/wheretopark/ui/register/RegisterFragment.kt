@@ -24,7 +24,6 @@ class RegisterFragment : Fragment() {
 
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
-    private var disposable: Disposable? = null
     private val viewModel: RegisterViewModel by activityViewModels()
     private lateinit var registerDisposable: Disposable
     private lateinit var validationDisposable: Disposable

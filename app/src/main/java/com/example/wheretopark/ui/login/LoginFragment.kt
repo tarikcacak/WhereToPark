@@ -17,6 +17,7 @@ import com.example.wheretopark.databinding.FragmentLoginBinding
 import com.example.wheretopark.util.RegisterValidation
 import com.example.wheretopark.util.showSnackBar
 import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import kotlin.math.log
 
@@ -25,7 +26,8 @@ class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
-    private var disposable: Disposable? = null
+    private lateinit var loginDisposable: Disposable
+    private lateinit var validationDisposable: Disposable
     private val viewModel: LoginViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -55,11 +57,53 @@ class LoginFragment : Fragment() {
             btnLogin.setOnClickListener {
                 val email = etEmail.text.toString().trim()
                 val password = etPassword.text.toString()
-                viewModel.validate(email, password)
                 viewModel.login(email, password)
-                binding.pbLogin.visibility = View.VISIBLE
             }
         }
+    }
+
+    private fun observeLogin() {
+        loginDisposable = viewModel.observeLoginSubject()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe() { resource ->
+                when (resource) {
+                    is Resource.Loading -> {
+                        binding.pbLogin.visibility = View.VISIBLE
+                    }
+                    is Resource.Error -> {
+                        binding.pbLogin.visibility = View.GONE
+                        showSnackBar(message = resource.message)
+                    }
+                    is Resource.Success -> {
+                        binding.pbLogin.visibility = View.GONE
+                        Intent(requireActivity(), MainActivity::class.java).also { intent ->
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                            startActivity(intent)
+                        }
+                        showSnackBar(message = "Login successful!")
+                    }
+                    else -> Unit
+                }
+            }
+    }
+
+    private fun observeValidation() {
+        validationDisposable = viewModel.observeValidationSubject()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe() { validation ->
+                if (validation.email is RegisterValidation.Failed) {
+                    binding.layoutEmail.apply {
+                        requestFocus()
+                        binding.layoutEmail.helperText = validation.email.message
+                    }
+                }
+                if (validation.password is RegisterValidation.Failed) {
+                    binding.layoutPassword.apply {
+                        requestFocus()
+                        binding.layoutPassword.helperText = validation.password.message
+                    }
+                }
+            }
     }
 
     private fun onRegisterNowClickListener() {
@@ -68,51 +112,14 @@ class LoginFragment : Fragment() {
         }
     }
 
-    @SuppressLint("CheckResult")
-    private fun observeValidation() {
-        disposable = viewModel.observeValidationRxJava()
-            .subscribe(
-                { loginFieldState ->
-                    if (loginFieldState.email is RegisterValidation.Failed) {
-                        binding.etEmail.apply {
-                            requestFocus()
-                            binding.layoutEmail.helperText = loginFieldState.email.message
-                        }
-                    }
-                    if (loginFieldState.password is RegisterValidation.Failed) {
-                        binding.etPassword.apply {
-                            requestFocus()
-                            binding.layoutPassword.helperText = loginFieldState.password.message
-                        }
-                    }
-                },
-                { throwable ->
-                    showSnackBar(message = throwable.message)
-                }
-            )
-    }
-
-    @SuppressLint("CheckResult")
-    private fun observeLogin() {
-        disposable = viewModel.observeLoginRxJava()
-            .subscribe(
-                {
-                    binding.pbLogin.visibility = View.GONE
-                    showSnackBar(message = "Login successful!")
-                    Intent(requireActivity(), MainActivity::class.java).also { intent ->
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                        startActivity(intent)
-                    }
-                },
-                { throwable ->
-                    binding.pbLogin.visibility = View.GONE
-                    showSnackBar(message = throwable.message)
-                }
-            )
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
-        disposable?.dispose()
+        if (::loginDisposable.isInitialized && !loginDisposable.isDisposed) {
+            loginDisposable.dispose()
+        }
+        if (::validationDisposable.isInitialized && !validationDisposable.isDisposed) {
+            validationDisposable.dispose()
+        }
+        _binding = null
     }
 }
