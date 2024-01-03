@@ -116,4 +116,7 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'com.jakewharton.rxrelay3:rxrelay:3.0.0'
 
+    //Open Street Map
+    implementation 'org.osmdroid:osmdroid-android:6.0.0'
+
 }
