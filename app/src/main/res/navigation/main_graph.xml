@@ -7,17 +7,17 @@
 
     <fragment
         android:id="@+id/mapFragment"
-        android:name="com.example.wheretopark.MapFragment"
+        android:name="com.example.wheretopark.ui.map.MapFragment"
         android:label="fragment_map"
         tools:layout="@layout/fragment_map" />
     <fragment
         android:id="@+id/creditFragment"
-        android:name="com.example.wheretopark.CreditFragment"
+        android:name="com.example.wheretopark.ui.credit.CreditFragment"
         android:label="fragment_credit"
         tools:layout="@layout/fragment_credit" />
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.example.wheretopark.ProfileFragment"
+        android:name="com.example.wheretopark.ui.profile.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" />
 </navigation>
