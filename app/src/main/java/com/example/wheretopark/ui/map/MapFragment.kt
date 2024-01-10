@@ -13,11 +13,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.activityViewModels
 import com.example.wheretopark.R
 import com.example.wheretopark.databinding.FragmentMapBinding
 import com.example.wheretopark.util.showSnackBar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
 import org.osmdroid.library.BuildConfig
@@ -36,7 +38,7 @@ class MapFragment : Fragment() {
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
-
+    private val viewModel: MapViewModel by activityViewModels()
     private lateinit var parkingOverlay: ItemizedIconOverlay<OverlayItem>
 
     override fun onCreateView(
@@ -73,8 +75,8 @@ class MapFragment : Fragment() {
         return ItemizedIconOverlay(
             ArrayList(),
             object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
-                override fun onItemSingleTapUp(index: Int, item: OverlayItem?): Boolean {
-                    // Handle marker click if needed
+                override fun onItemSingleTapUp(index: Int, item: OverlayItem): Boolean {
+                    showParkingOptionsDialog(item)
                     return true
                 }
 
@@ -135,7 +137,18 @@ class MapFragment : Fragment() {
 
                 }
             }
+            .show()
     }
+
+    private fun observeCredits() {
+        viewModel.observeCreditState()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe() { credits ->
+
+            }
+    }
+
+
 
     private fun addParkingToMap(map: MapView) {
         val parkingOmega = OverlayItem("Parking Omega", "Description", GeoPoint(44.5384215, 18.6633669))
@@ -144,6 +157,12 @@ class MapFragment : Fragment() {
         val parkingHotelTuzla = OverlayItem("Parking Hotel Tuzla", "Description", GeoPoint(44.5314820, 18.6888965))
         val parkingMellain = OverlayItem("Parking Mellain", "Description", GeoPoint(44.534133, 18.687450))
         val parkingBelamionix = OverlayItem("Parking Belamionix", "Description", GeoPoint(44.525375, 18.628034))
+        val parkingSkver = OverlayItem("Parking Skver", "Description", GeoPoint(44.540804, 18.673156))
+        val parkingTrgSlobode = OverlayItem("Parking Trg Slobode", "Description", GeoPoint(44.539912, 18.676031))
+        val parkingTuzla = OverlayItem("Parking Tuzla", "Description", GeoPoint(44.540185, 18.675012))
+        val parkingPanonica = OverlayItem("Parking Panonica", "Description", GeoPoint(44.538399, 18.683061))
+        val parking15Maj = OverlayItem("Parking 15 Maj", "Description", GeoPoint(44.533129, 18.696312))
+        val parkingMercator = OverlayItem("Parking 15 Maj", "Description", GeoPoint(44.533135, 18.682501))
 
         parkingOverlay.addItem(parkingOmega)
         parkingOverlay.addItem(parkingBCC)
@@ -151,6 +170,12 @@ class MapFragment : Fragment() {
         parkingOverlay.addItem(parkingHotelTuzla)
         parkingOverlay.addItem(parkingMellain)
         parkingOverlay.addItem(parkingBelamionix)
+        parkingOverlay.addItem(parkingSkver)
+        parkingOverlay.addItem(parkingTrgSlobode)
+        parkingOverlay.addItem(parkingTuzla)
+        parkingOverlay.addItem(parkingPanonica)
+        parkingOverlay.addItem(parking15Maj)
+        parkingOverlay.addItem(parkingMercator)
 
         map.overlays.add(parkingOverlay)
     }

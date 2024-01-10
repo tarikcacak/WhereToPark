@@ -1,5 +1,6 @@
 package com.example.wheretopark.ui.map
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.airmovies.util.Resource
 import com.google.firebase.auth.FirebaseAuth
@@ -14,9 +15,29 @@ class MapViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val creditSubject: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    val creditState: Observable<String> = creditSubject.hide()
 
-    fun updateProgressState(newState: String) {
-        creditSubject.onNext(newState)
+    val currentUid = firebaseAuth.currentUser?.uid.toString()
+
+    fun getData() {
+        firebaseFirestore.collection("user").whereEqualTo("uid", currentUid)
+            .addSnapshotListener { snapshot, exception ->
+                if (exception != null) {
+                    Log.e("MapViewModel", "Error fetching data: ${exception.message}")
+                    return@addSnapshotListener
+                }
+
+                if (!snapshot!!.isEmpty) {
+                    val documentList = snapshot.documents
+
+                    for (document in documentList) {
+                        val credits = document.get("credits") as String
+                        creditSubject.onNext(credits)
+                    }
+                }
+            }
+    }
+
+    fun observeCreditState(): Observable<String> {
+        return creditSubject
     }
 }
