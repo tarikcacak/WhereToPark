@@ -31,3 +31,17 @@ fun validateUser(username: String): RegisterValidation {
 
     return RegisterValidation.Success
 }
+
+fun validatePlates(plates: String): RegisterValidation {
+    val regex = Regex("""^[A-Z]\d{2}-[A-Z]-[A-Z\d]{1,3}$""")
+
+    if (plates.isEmpty()) {
+        return RegisterValidation.Failed("Plates can't be empty!")
+    }
+
+    if (!regex.matches(plates)) {
+        return RegisterValidation.Failed("Wrong format!")
+    }
+
+    return RegisterValidation.Success
+}

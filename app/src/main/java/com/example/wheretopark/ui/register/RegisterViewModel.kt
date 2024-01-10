@@ -10,6 +10,7 @@ import com.example.wheretopark.util.RegisterFieldState
 import com.example.wheretopark.util.RegisterValidation
 import com.example.wheretopark.util.validateEmail
 import com.example.wheretopark.util.validatePassword
+import com.example.wheretopark.util.validatePlates
 import com.example.wheretopark.util.validateUser
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -44,6 +45,7 @@ class RegisterViewModel @Inject constructor(
             val registerFieldState = RegisterFieldState(
                 validateUser(user.username),
                 validateEmail(user.email),
+                validatePlates(user.plates),
                 validatePassword(user.password)
             )
             validationSubject.onNext(registerFieldState)
@@ -54,8 +56,9 @@ class RegisterViewModel @Inject constructor(
     private fun saveUserInfo(userUid: String, user: User) {
         val hashMap = hashMapOf<String, Any>()
         hashMap["username"] = user.username
-        hashMap["email"] = user.username
+        hashMap["email"] = user.email
         hashMap["password"] = user.password
+        hashMap["plates"] = user.plates
         hashMap["imgPath"] = user.imgPath
         hashMap["favorites"] = user.favorites
         hashMap["uid"] = userUid
@@ -74,8 +77,10 @@ class RegisterViewModel @Inject constructor(
         val emailValidaiton = validateEmail(user.email)
         val passwordValidation = validatePassword(user.password)
         val userValidation = validateUser(user.username)
+        val platesValidation = validatePlates(user.plates)
         val shouldRegister = emailValidaiton is RegisterValidation.Success &&
-                passwordValidation is RegisterValidation.Success && userValidation is RegisterValidation.Success
+                passwordValidation is RegisterValidation.Success && userValidation is RegisterValidation.Success &&
+                platesValidation is RegisterValidation.Success
 
         return shouldRegister
     }

@@ -107,24 +107,7 @@ class MapFragment : Fragment() {
         val cityGeoPoint = GeoPoint(cityLatitude, cityLongitude)
         mapController.setCenter(cityGeoPoint)
 
-        val mGpsLocationProvider = GpsMyLocationProvider(activity)
-        val mLocationOverlay = MyLocationNewOverlay(mGpsLocationProvider, map)
-        mLocationOverlay.enableMyLocation()
-        mLocationOverlay.enableFollowLocation()
-
-        val icon = BitmapFactory.decodeResource(resources, R.drawable.ic_menu_compas)
-        mLocationOverlay.setPersonIcon(icon)
-        map.overlays.add(mLocationOverlay)
-
-        mLocationOverlay.runOnFirstFix {
-            Handler(Looper.getMainLooper()).post {
-                map.overlays.clear()
-                map.overlays.add(mLocationOverlay)
-                mapController.animateTo(mLocationOverlay.myLocation)
-
-                addParkingToMap(map)
-            }
-        }
+        addParkingToMap(map)
     }
 
     override fun onRequestPermissionsResult(
@@ -157,9 +140,17 @@ class MapFragment : Fragment() {
     private fun addParkingToMap(map: MapView) {
         val parkingOmega = OverlayItem("Parking Omega", "Description", GeoPoint(44.5384215, 18.6633669))
         val parkingBCC = OverlayItem("Parking BCC", "Description", GeoPoint(44.5326340, 18.6532643))
+        val parkingGradski = OverlayItem("Gradski Parking", "Description", GeoPoint(44.5407361, 18.6767803))
+        val parkingHotelTuzla = OverlayItem("Parking Hotel Tuzla", "Description", GeoPoint(44.5314820, 18.6888965))
+        val parkingMellain = OverlayItem("Parking Mellain", "Description", GeoPoint(44.534133, 18.687450))
+        val parkingBelamionix = OverlayItem("Parking Belamionix", "Description", GeoPoint(44.525375, 18.628034))
 
         parkingOverlay.addItem(parkingOmega)
         parkingOverlay.addItem(parkingBCC)
+        parkingOverlay.addItem(parkingGradski)
+        parkingOverlay.addItem(parkingHotelTuzla)
+        parkingOverlay.addItem(parkingMellain)
+        parkingOverlay.addItem(parkingBelamionix)
 
         map.overlays.add(parkingOverlay)
     }

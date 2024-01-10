@@ -59,7 +59,8 @@ class RegisterFragment : Fragment() {
                     val user = User(
                         etUsername.text.toString().trim(),
                         etEmail.text.toString().trim(),
-                        etPassword.text.toString()
+                        etPassword.text.toString(),
+                        etPlate.text.toString().trim()
                     )
                     viewModel.createAccountWithEmailAndPassword(user)
                 } else {
@@ -110,6 +111,12 @@ class RegisterFragment : Fragment() {
                     binding.etPassword.apply {
                         requestFocus()
                         binding.layoutPassword.helperText = validation.password.message
+                    }
+                }
+                if (validation.plates is RegisterValidation.Failed) {
+                    binding.etPlate.apply {
+                        requestFocus()
+                        binding.layoutPlate.helperText = validation.plates.message
                     }
                 }
             }
