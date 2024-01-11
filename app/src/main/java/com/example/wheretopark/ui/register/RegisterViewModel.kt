@@ -59,6 +59,7 @@ class RegisterViewModel @Inject constructor(
         hashMap["email"] = user.email
         hashMap["password"] = user.password
         hashMap["plates"] = user.plates
+        hashMap["credits"] = user.credits
         hashMap["imgPath"] = user.imgPath
         hashMap["favorites"] = user.favorites
         hashMap["uid"] = userUid

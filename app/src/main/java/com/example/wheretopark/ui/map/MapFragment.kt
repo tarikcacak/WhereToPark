@@ -16,10 +16,12 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.example.wheretopark.R
 import com.example.wheretopark.databinding.FragmentMapBinding
+import com.example.wheretopark.models.ticket.Ticket
 import com.example.wheretopark.util.showSnackBar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.Disposable
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
 import org.osmdroid.library.BuildConfig
@@ -32,14 +34,20 @@ import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.util.Calendar
+import java.util.Date
 
 @AndroidEntryPoint
 class MapFragment : Fragment() {
 
     private var _binding: FragmentMapBinding? = null
     private val binding get() = _binding!!
+    private lateinit var creditDisposable: Disposable
+    private lateinit var userDisposable: Disposable
     private val viewModel: MapViewModel by activityViewModels()
     private lateinit var parkingOverlay: ItemizedIconOverlay<OverlayItem>
+    private lateinit var username: String
+    private lateinit var currentCredits: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,6 +62,8 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         checkAndRequestPermissions()
+        viewModel.getData()
+        observeRxJava()
     }
 
     private fun checkAndRequestPermissions() {
@@ -129,22 +139,95 @@ class MapFragment : Fragment() {
 
     private fun showParkingOptionsDialog(overlayItem: OverlayItem) {
         val parkingName = overlayItem.title
-        val options = arrayOf("Pay 2h", "Pay 5h", "Pay 1 day", "Pay 1 month", "Cancel")
+        val options = arrayOf("Pay 2h (2 credits)", "Pay 5h (4 credits)", "Pay 1 day (10 credits)", "Pay 1 month (100 credits)", "Cancel")
+
+        binding.tvCredits.visibility = View.VISIBLE
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(parkingName)
             .setItems(options) { _, which ->
                 when (which) {
-
+                    0 -> handlePaymentOption("Pay 2h", overlayItem)
+                    1 -> handlePaymentOption("Pay 5h", overlayItem)
+                    2 -> handlePaymentOption("Pay 1 day", overlayItem)
+                    3 -> handlePaymentOption("Pay 1 month", overlayItem)
+                    4 -> binding.tvCredits.visibility = View.GONE
                 }
             }
             .show()
     }
 
-    private fun observeCredits() {
-        viewModel.observeCreditState()
+    private fun handlePaymentOption(option: String, overlayItem: OverlayItem) {
+        val calendar = Calendar.getInstance()
+
+        when (option) {
+            "Pay 2h" -> {
+                if (currentCredits.toInt() < 2)
+                    showSnackBar("You don't have enough credits!")
+                else
+                    paymentFunction(1, overlayItem, calendar, 2)
+                binding.tvCredits.visibility = View.GONE
+            }
+            "Pay 5h" -> {
+                if (currentCredits.toInt() < 4)
+                    showSnackBar("You don't have enough credits!")
+                else
+                    paymentFunction(5, overlayItem, calendar, 4)
+                binding.tvCredits.visibility = View.GONE
+            }
+            "Pay 1 day" -> {
+                if (currentCredits.toInt() < 10)
+                    showSnackBar("You don't have enough credits!")
+                else
+                    paymentFunction(24, overlayItem, calendar, 10)
+                binding.tvCredits.visibility = View.GONE
+            }
+            "Pay 1 month" -> {
+                if (currentCredits.toInt() < 100)
+                    showSnackBar("You don't have enough credits!")
+                else
+                    paymentFunction(30*24, overlayItem, calendar, 100)
+                binding.tvCredits.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun paymentFunction(time: Int, overlayItem: OverlayItem, calendar: Calendar, credits: Int) {
+        val timeStr: String = when (time) {
+            24 -> "1 day"
+            30*24 -> "1 day"
+            else -> "${time}h"
+        }
+        showSnackBar(message = "$timeStr ticket transaction successful!")
+        val location = overlayItem.title
+        val expiring = calculateExpirationTime(calendar, 30*24)
+        val user = username
+        val ticket = Ticket(
+            location,
+            expiring.toString(),
+            user
+        )
+        val newCredits = currentCredits.toInt() - credits
+        viewModel.updateUserCredits(newCredits)
+        viewModel.saveTicketInfo(ticket)
+    }
+
+    private fun calculateExpirationTime(calendar: Calendar, hoursToAdd: Int): Date {
+        calendar.add(Calendar.HOUR_OF_DAY, hoursToAdd)
+        return calendar.time
+    }
+
+    private fun observeRxJava() {
+        creditDisposable = viewModel.observeCreditState()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe() { credits ->
-
+                currentCredits = credits
+                binding.tvCredits.text = "Credits: $credits"
+            }
+        userDisposable = viewModel.observeUserState()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe() { user ->
+                username = user
             }
     }
 
@@ -186,6 +269,9 @@ class MapFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        if (::creditDisposable.isInitialized && !creditDisposable.isDisposed) {
+            creditDisposable.dispose()
+        }
         _binding = null
     }
 
