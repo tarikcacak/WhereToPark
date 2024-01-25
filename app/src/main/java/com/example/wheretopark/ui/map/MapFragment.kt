@@ -2,11 +2,8 @@ package com.example.wheretopark.ui.map
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
+import android.icu.text.SimpleDateFormat
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -14,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import com.example.wheretopark.R
 import com.example.wheretopark.databinding.FragmentMapBinding
 import com.example.wheretopark.models.ticket.Ticket
 import com.example.wheretopark.util.showSnackBar
@@ -29,13 +25,10 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.ItemizedIconOverlay
-import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.OverlayItem
-import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 @AndroidEntryPoint
 class MapFragment : Fragment() {
@@ -44,10 +37,12 @@ class MapFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var creditDisposable: Disposable
     private lateinit var userDisposable: Disposable
+    private lateinit var ticketsDisposable: Disposable
     private val viewModel: MapViewModel by activityViewModels()
     private lateinit var parkingOverlay: ItemizedIconOverlay<OverlayItem>
     private lateinit var username: String
     private lateinit var currentCredits: String
+    private lateinit var ticketList: List<Ticket>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,7 +57,8 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         checkAndRequestPermissions()
-        viewModel.getData()
+        viewModel.getUserData()
+        viewModel.getTicketData()
         observeRxJava()
     }
 
@@ -140,8 +136,24 @@ class MapFragment : Fragment() {
     private fun showParkingOptionsDialog(overlayItem: OverlayItem) {
         val parkingName = overlayItem.title
         val options = arrayOf("Pay 2h (2 credits)", "Pay 5h (4 credits)", "Pay 1 day (10 credits)", "Pay 1 month (100 credits)", "Cancel")
+        var hasTicket: Boolean = false
+        for (ticket in ticketList) {
+            if (ticket.location == parkingName) {
+                val expiring = formatExpiringDate(ticket.expiring)
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(parkingName)
+                    .setMessage("You currently have a ticket on this parking that is expiring: $expiring")
+                    .setCancelable(true)
+                    .setPositiveButton("End") { dialog, which ->
 
+                    }
+                hasTicket = true
+            }
+        }
         binding.tvCredits.visibility = View.VISIBLE
+
+        if (hasTicket) {
+        }
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(parkingName)
@@ -195,7 +207,7 @@ class MapFragment : Fragment() {
     private fun paymentFunction(time: Int, overlayItem: OverlayItem, calendar: Calendar, credits: Int) {
         val timeStr: String = when (time) {
             24 -> "1 day"
-            30*24 -> "1 day"
+            30*24 -> "1 month"
             else -> "${time}h"
         }
         showSnackBar(message = "$timeStr ticket transaction successful!")
@@ -229,6 +241,11 @@ class MapFragment : Fragment() {
             .subscribe() { user ->
                 username = user
             }
+        ticketsDisposable = viewModel.observeTicketsState()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe() { tickets ->
+                ticketList = tickets
+            }
     }
 
 
@@ -261,6 +278,19 @@ class MapFragment : Fragment() {
         parkingOverlay.addItem(parkingMercator)
 
         map.overlays.add(parkingOverlay)
+    }
+
+    private fun formatExpiringDate(expiringDate: String): String {
+        val inputFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)
+        val outputFormat = SimpleDateFormat("dd MMM HH:mm:ss", Locale.ENGLISH)
+
+        try {
+            val date = inputFormat.parse(expiringDate)
+            return outputFormat.format(date)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return "Invalid Date"
+        }
     }
 
     companion object {

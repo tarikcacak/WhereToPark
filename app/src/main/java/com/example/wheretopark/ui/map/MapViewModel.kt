@@ -21,14 +21,16 @@ class MapViewModel @Inject constructor(
     private val creditSubject: PublishSubject<String> = PublishSubject.create()
     private val userSubject: PublishSubject<String> = PublishSubject.create()
     private val ticketSubject: BehaviorSubject<Resource<Ticket>> = BehaviorSubject.createDefault(Resource.Unspecified())
+    private val ticketListSubject: PublishSubject<List<Ticket>> = PublishSubject.create()
+
 
     val currentUid = firebaseAuth.currentUser?.uid.toString()
 
-    fun getData() {
+    fun getUserData() {
         firebaseFirestore.collection("user").whereEqualTo("uid", currentUid)
             .addSnapshotListener { snapshot, exception ->
                 if (exception != null) {
-                    Log.e("MapViewModel", "Error fetching data: ${exception.message}")
+                    Log.e("MapViewModel", "Error fetching user data: ${exception.message}")
                     return@addSnapshotListener
                 } else {
                     if (!snapshot!!.isEmpty) {
@@ -53,7 +55,7 @@ class MapViewModel @Inject constructor(
         val hashMap = hashMapOf<String, Any>()
         hashMap["location"] = ticket.location
         hashMap["expiring"] = ticket.expiring
-        hashMap["user"] = ticket.user
+        hashMap["uid"] = currentUid
 
         firebaseFirestore.collection("ticket")
             .add(hashMap)
@@ -64,6 +66,30 @@ class MapViewModel @Inject constructor(
                 ticketSubject.onNext(Resource.Error(it.message.toString()))
             }
 
+    }
+
+    fun getTicketData() {
+        firebaseFirestore.collection("ticket").whereEqualTo("uid", currentUid)
+            .addSnapshotListener { snapshot, exception ->
+                if (exception != null) {
+                    Log.e("MapViewModel", "Error fetching ticket data: ${exception.message}")
+                    return@addSnapshotListener
+                } else {
+                    if (!snapshot!!.isEmpty) {
+                        val ticketList = mutableListOf<Ticket>()
+
+                        for (document in snapshot.documents) {
+                            val location = document.getString("location") ?: ""
+                            val expiring = document.getString("expiring") ?: ""
+                            val uid = document.getString("uid") ?: ""
+
+                            val ticket = Ticket(location, expiring, uid)
+                            ticketList.add(ticket)
+                        }
+                        ticketListSubject.onNext(ticketList)
+                    }
+                }
+            }
     }
 
     fun updateUserCredits(newCredits: Int) {
@@ -80,11 +106,48 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    fun deleteTicket(ticket: Ticket) {
+        val location = ticket.location
+
+        firebaseFirestore.collection("ticket")
+            .whereEqualTo("uid", currentUid)
+            .whereEqualTo("location", location)
+            .addSnapshotListener { snapshot, exception ->
+                if (exception != null) {
+                    Log.e("MapViewModel", "Error deleting ticket: ${exception.message}")
+                    return@addSnapshotListener
+                } else {
+                    if (!snapshot!!.isEmpty) {
+                        for (document in snapshot.documents) {
+                            val uid = document.getString("uid")
+                            val loc = document.getString("location")
+                            if (uid == currentUid && loc == location) {
+                                document.reference.delete()
+                                    .addOnSuccessListener {
+                                        ticketSubject.onNext(Resource.Success(ticket.copy()))
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("MapViewModel", "Error deleting ticket: ${e.message}")
+                                        ticketSubject.onNext(Resource.Error("Error deleting ticket"))
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
+    }
+
+
+
     fun observeCreditState(): Observable<String> {
         return creditSubject.hide()
     }
 
     fun observeUserState(): Observable<String> {
         return userSubject.hide()
+    }
+
+    fun observeTicketsState(): Observable<List<Ticket>> {
+        return ticketListSubject.hide()
     }
 }
