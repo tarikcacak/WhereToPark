@@ -1,9 +1,9 @@
 This is a small Android app for buying parking tickets in Tuzla. You have a few options for parking tickets and 
 all tickets have their prices. You can also buy credits inside the app, but the pay checkout is not implemented.
 The application also allows you to to end your tickets. For building the application I used Open Street Map API,
-Dagger-Hilt, MVVM acrhitecture, firebase, Kotlin, RxJava, XML...
+Dagger-Hilt, MVVM acrhitecture, firebase, Kotlin, RxJava, XML...<br>
 Youtube video link: https://www.youtube.com/watch?v=UhapKf4kdSc
-
+<br>
 <img src="https://github.com/tarikcacak/WhereToPark/assets/113112797/00b3ccec-9802-42a3-bc76-982f02f24cc1" width="400" height="800">
 <br>
 <img src="https://github.com/tarikcacak/WhereToPark/assets/113112797/7eb6e3a3-2105-4d37-9b68-9df87bc34be9" width="400" height="800">
