@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import javax.inject.Inject
@@ -50,6 +51,7 @@ class ProfileViewModel @Inject constructor(
                             pictureSubject.onNext(picture)
                             emailSubject.onNext(email)
                             platesSubject.onNext(plates)
+                            Log.d("ProfileViewModel", picture)
                         }
                     }
                 }
@@ -131,4 +133,27 @@ class ProfileViewModel @Inject constructor(
         firebaseAuth.signOut()
     }
 
+    fun observeCreditState(): Observable<String> {
+        return creditSubject.hide()
+    }
+
+    fun observeUserState(): Observable<String> {
+        return userSubject.hide()
+    }
+
+    fun observePictureState(): Observable<String> {
+        return pictureSubject.hide()
+    }
+
+    fun observeEmailState(): Observable<String> {
+        return emailSubject.hide()
+    }
+
+    fun observePlateState(): Observable<String> {
+        return platesSubject.hide()
+    }
+
+    fun observeTicketsState(): Observable<List<Ticket>> {
+        return ticketsSubject.hide()
+    }
 }

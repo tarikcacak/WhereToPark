@@ -3,6 +3,7 @@ package com.example.wheretopark.ui.map
 import android.Manifest
 import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
+import android.icu.util.TimeZone
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
@@ -64,16 +65,19 @@ class MapFragment : Fragment() {
     }
 
     private fun checkTicketDateExpiring() {
-        val inputFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)
         val currentDate = Calendar.getInstance().time
         val ticketsToRemove = mutableListOf<Ticket>()
+
         for (ticket in ticketList) {
-            val expDate = inputFormat.parse(ticket.expiring)
-            if (expDate != null && expDate.before(currentDate)) {
+            val expiringDate = SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH).parse(ticket.expiring)
+            if (expiringDate != null && expiringDate.before(currentDate)) {
                 ticketsToRemove.add(ticket)
             }
         }
+
         for (ticket in ticketsToRemove) {
+            // Remove the ticket from the list and delete it from the database
+            ticketList -= ticket
             viewModel.deleteTicket(ticket)
         }
     }
@@ -225,17 +229,13 @@ class MapFragment : Fragment() {
     }
 
     private fun handlePaymentOption(option: String, overlayItem: OverlayItem) {
-        Log.d("MapFragment", "handlePaymentOption called")
         val calendar = Calendar.getInstance()
-
         when (option) {
             "Pay 2h" -> {
                 if (currentCredits.toInt() < 2)
                     showSnackBar("You don't have enough credits!")
                 else
-                    Log.d("MapFragment", "buy ticket called")
                     paymentFunction(1, overlayItem, calendar, 2)
-                Log.d("MapFragment", "remove credits called")
                 binding.tvCredits.visibility = View.GONE
             }
             "Pay 5h" -> {
@@ -244,7 +244,6 @@ class MapFragment : Fragment() {
                 else
                     paymentFunction(5, overlayItem, calendar, 4)
                 binding.tvCredits.visibility = View.GONE
-                observeRxJava()
             }
             "Pay 1 day" -> {
                 if (currentCredits.toInt() < 10)
@@ -271,7 +270,7 @@ class MapFragment : Fragment() {
         }
         showSnackBar(message = "$timeStr ticket transaction successful!")
         val location = overlayItem.title
-        val expiring = calculateExpirationTime(calendar, 30*24)
+        val expiring = calculateExpirationTime(calendar, time)
         val user = username
         val ticket = Ticket(
             location,
@@ -284,6 +283,7 @@ class MapFragment : Fragment() {
     }
 
     private fun calculateExpirationTime(calendar: Calendar, hoursToAdd: Int): Date {
+        calendar.timeZone = java.util.TimeZone.getTimeZone("Europe/Sarajevo")
         calendar.add(Calendar.HOUR_OF_DAY, hoursToAdd)
         return calendar.time
     }
@@ -291,17 +291,20 @@ class MapFragment : Fragment() {
     private fun observeRxJava() {
         creditDisposable = viewModel.observeCreditState()
             .observeOn(AndroidSchedulers.mainThread())
+            .filter { isAdded }
             .subscribe() { credits ->
                 currentCredits = credits
                 binding.tvCredits.text = "Credits: $credits"
             }
         userDisposable = viewModel.observeUserState()
             .observeOn(AndroidSchedulers.mainThread())
+            .filter { isAdded }
             .subscribe() { user ->
                 username = user
             }
         ticketsDisposable = viewModel.observeTicketsState()
             .observeOn(AndroidSchedulers.mainThread())
+            .filter { isAdded }
             .subscribe() { tickets ->
                 ticketList = tickets
                 checkTicketDateExpiring()
@@ -368,5 +371,4 @@ class MapFragment : Fragment() {
         }
         _binding = null
     }
-
 }
