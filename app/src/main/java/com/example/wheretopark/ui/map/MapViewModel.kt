@@ -39,12 +39,8 @@ class MapViewModel @Inject constructor(
                         for (document in documentList) {
                             val credits = document.get("credits") as String
                             val user = document.get("username") as String
-                            if (credits != null && user != null) {
-                                creditSubject.onNext(credits)
-                                userSubject.onNext(user)
-                            } else {
-                                Log.w("MapViewModel", "Credits is null in document")
-                            }
+                            creditSubject.onNext(credits)
+                            userSubject.onNext(user)
                         }
                     }
                 }
@@ -93,17 +89,13 @@ class MapViewModel @Inject constructor(
     }
 
     fun updateUserCredits(newCredits: Int) {
-        if (currentUid != null) {
-            firebaseFirestore.collection("user")
-                .document(currentUid)
-                .update("credits", newCredits.toString())
-                .addOnSuccessListener {}
-                .addOnFailureListener { e ->
-                    Log.e("MapViewModel", "Error updating credits: ${e.message}")
-                }
-        } else {
-            Log.e("MapViewModel", "User UID is null")
-        }
+        firebaseFirestore.collection("user")
+            .document(currentUid)
+            .update("credits", newCredits.toString())
+            .addOnSuccessListener {}
+            .addOnFailureListener { e ->
+                Log.e("MapViewModel", "Error updating credits: ${e.message}")
+            }
     }
 
     fun deleteTicket(ticket: Ticket) {

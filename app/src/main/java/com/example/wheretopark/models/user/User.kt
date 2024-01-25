@@ -8,6 +8,5 @@ data class User(
     val password: String,
     val plates: String,
     val imgPath: String = "",
-    val credits: String = "0",
-    val favorites: List<Favorite> = emptyList()
+    val credits: String = "0"
 )

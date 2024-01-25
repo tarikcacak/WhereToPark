@@ -308,8 +308,6 @@ class MapFragment : Fragment() {
             }
     }
 
-
-
     private fun addParkingToMap(map: MapView) {
         val parkingOmega = OverlayItem("Parking Omega", "Description", GeoPoint(44.5384215, 18.6633669))
         val parkingBCC = OverlayItem("Parking BCC", "Description", GeoPoint(44.5326340, 18.6532643))

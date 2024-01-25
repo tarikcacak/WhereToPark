@@ -1,14 +1,202 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.credit.CreditFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="CREDIT FRAGMENT" />
+        android:id="@+id/tvBuyCredit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Buy Credits"
+        android:textSize="35sp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/sffontbold"
+        android:layout_marginTop="@dimen/_30sdp"
+        android:layout_marginStart="@dimen/_20sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/tvCredits"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Credits: "
+        android:textSize="@dimen/_15sdp"
+        android:textColor="@color/btn_blue"
+        android:fontFamily="@font/sffontbold"
+        app:layout_constraintStart_toEndOf="@id/tvBuyCredit"
+        app:layout_constraintTop_toTopOf="@id/tvBuyCredit"
+        app:layout_constraintBottom_toBottomOf="@id/tvBuyCredit"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvOptionOne"
+        android:layout_width="@dimen/_220sdp"
+        android:layout_height="@dimen/_120sdp"
+        android:layout_marginTop="@dimen/_40sdp"
+        app:cardCornerRadius="@dimen/_18sdp"
+        app:cardElevation="8dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvBuyCredit" >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tvGold"
+                android:text="Gold Pack"
+                android:textSize="@dimen/_20sdp"
+                android:textColor="#FFD700"
+                android:fontFamily="@font/sffontbold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <TextView
+                android:id="@+id/tvGoldCost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Costs: 40KM"
+                android:fontFamily="@font/sffontbold"
+                android:textSize="@dimen/_14sdp"
+                android:layout_marginTop="@dimen/_5sdp"
+                app:layout_constraintTop_toBottomOf="@id/tvGold"
+                app:layout_constraintStart_toStartOf="@id/tvGold"
+                app:layout_constraintEnd_toEndOf="@id/tvGold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="100 credits"
+                android:textSize="@dimen/_14sdp"
+                app:layout_constraintTop_toBottomOf="@id/tvGoldCost"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvOptionTwo"
+        android:layout_width="@dimen/_220sdp"
+        android:layout_height="@dimen/_120sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        app:cardCornerRadius="@dimen/_18sdp"
+        app:cardElevation="8dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cvOptionOne">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tvSilver"
+                android:text="Silver Pack"
+                android:textSize="@dimen/_20sdp"
+                android:textColor="#757575"
+                android:fontFamily="@font/sffontbold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <TextView
+                android:id="@+id/tvSilverCost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Costs: 20KM"
+                android:fontFamily="@font/sffontbold"
+                android:textSize="@dimen/_14sdp"
+                android:layout_marginTop="@dimen/_5sdp"
+                app:layout_constraintTop_toBottomOf="@id/tvSilver"
+                app:layout_constraintStart_toStartOf="@id/tvSilver"
+                app:layout_constraintEnd_toEndOf="@id/tvSilver"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="50 credits"
+                android:textSize="@dimen/_14sdp"
+                app:layout_constraintTop_toBottomOf="@id/tvSilverCost"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvOptionThree"
+        android:layout_width="@dimen/_220sdp"
+        android:layout_height="@dimen/_120sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        app:cardCornerRadius="@dimen/_18sdp"
+        app:cardElevation="8dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cvOptionTwo">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tvBronze"
+                android:text="Bronze Pack"
+                android:textSize="@dimen/_20sdp"
+                android:textColor="#CD7F32"
+                android:fontFamily="@font/sffontbold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_12sdp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <TextView
+                android:id="@+id/tvBronzeCost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Costs: 5KM"
+                android:fontFamily="@font/sffontbold"
+                android:textSize="@dimen/_14sdp"
+                android:layout_marginTop="@dimen/_5sdp"
+                app:layout_constraintTop_toBottomOf="@id/tvBronze"
+                app:layout_constraintStart_toStartOf="@id/tvBronze"
+                app:layout_constraintEnd_toEndOf="@id/tvBronze"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10 credits"
+                android:textSize="@dimen/_14sdp"
+                app:layout_constraintTop_toBottomOf="@id/tvBronzeCost"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
