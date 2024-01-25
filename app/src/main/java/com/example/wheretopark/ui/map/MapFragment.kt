@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -62,6 +63,21 @@ class MapFragment : Fragment() {
         observeRxJava()
     }
 
+    private fun checkTicketDateExpiring() {
+        val inputFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)
+        val currentDate = Calendar.getInstance().time
+        val ticketsToRemove = mutableListOf<Ticket>()
+        for (ticket in ticketList) {
+            val expDate = inputFormat.parse(ticket.expiring)
+            if (expDate != null && expDate.before(currentDate)) {
+                ticketsToRemove.add(ticket)
+            }
+        }
+        for (ticket in ticketsToRemove) {
+            viewModel.deleteTicket(ticket)
+        }
+    }
+
     private fun checkAndRequestPermissions() {
         val requiredPermissions = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -86,8 +102,8 @@ class MapFragment : Fragment() {
                     return true
                 }
 
-                override fun onItemLongPress(index: Int, item: OverlayItem?): Boolean {
-                    // Handle long press on marker if needed
+                override fun onItemLongPress(index: Int, item: OverlayItem): Boolean {
+                    showParkingDetails(item)
                     return false
                 }
             },
@@ -109,8 +125,8 @@ class MapFragment : Fragment() {
         mapController = map.getController()
         mapController.setZoom(18)
 
-        val cityLatitude = 44.5376
-        val cityLongitude = 18.6694
+        val cityLatitude = 44.537583
+        val cityLongitude = 18.679928
 
         val cityGeoPoint = GeoPoint(cityLatitude, cityLongitude)
         mapController.setCenter(cityGeoPoint)
@@ -136,40 +152,80 @@ class MapFragment : Fragment() {
     private fun showParkingOptionsDialog(overlayItem: OverlayItem) {
         val parkingName = overlayItem.title
         val options = arrayOf("Pay 2h (2 credits)", "Pay 5h (4 credits)", "Pay 1 day (10 credits)", "Pay 1 month (100 credits)", "Cancel")
-        var hasTicket: Boolean = false
-        for (ticket in ticketList) {
-            if (ticket.location == parkingName) {
-                val expiring = formatExpiringDate(ticket.expiring)
+        if (::ticketList.isInitialized && ticketList.isNotEmpty()) {
+            var hasTicket = false
+            var ticketToDelete: Ticket? = null
+            for (ticket in ticketList) {
+                if (ticket.location == parkingName) {
+                    hasTicket = true
+                    ticketToDelete = ticket
+                    val expiring = formatExpiringDate(ticket.expiring)
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(parkingName)
+                        .setMessage("You currently have a ticket on this parking that is expiring: $expiring")
+                        .setCancelable(true)
+                        .setPositiveButton("End") { dialog, which ->
+                            viewModel.deleteTicket(ticketToDelete!!)
+                            hasTicket = false
+                            showSnackBar("You successfully ended a ticket!")
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton("Cancel") { dialog, which ->
+                            dialog.dismiss()
+                        }
+                        .show()
+                    observeRxJava()
+                    break
+                }
+            }
+
+            if (!hasTicket) {
+                binding.tvCredits.visibility = View.VISIBLE
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(parkingName)
-                    .setMessage("You currently have a ticket on this parking that is expiring: $expiring")
-                    .setCancelable(true)
-                    .setPositiveButton("End") { dialog, which ->
-
+                    .setItems(options) { _, which ->
+                        when (which) {
+                            0 -> handlePaymentOption("Pay 2h", overlayItem)
+                            1 -> handlePaymentOption("Pay 5h", overlayItem)
+                            2 -> handlePaymentOption("Pay 1 day", overlayItem)
+                            3 -> handlePaymentOption("Pay 1 month", overlayItem)
+                            4 -> binding.tvCredits.visibility = View.GONE
+                        }
                     }
-                hasTicket = true
+                    .setCancelable(true)
+                    .show()
             }
+        } else {
+            binding.tvCredits.visibility = View.VISIBLE
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(parkingName)
+                .setItems(options) { _, which ->
+                    when (which) {
+                        0 -> handlePaymentOption("Pay 2h", overlayItem)
+                        1 -> handlePaymentOption("Pay 5h", overlayItem)
+                        2 -> handlePaymentOption("Pay 1 day", overlayItem)
+                        3 -> handlePaymentOption("Pay 1 month", overlayItem)
+                        4 -> binding.tvCredits.visibility = View.GONE
+                    }
+                }
+                .setCancelable(true)
+                .show()
         }
-        binding.tvCredits.visibility = View.VISIBLE
+    }
 
-        if (hasTicket) {
-        }
-
+    private fun showParkingDetails(overlayItem: OverlayItem) {
+        val parkingName = overlayItem.title
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(parkingName)
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> handlePaymentOption("Pay 2h", overlayItem)
-                    1 -> handlePaymentOption("Pay 5h", overlayItem)
-                    2 -> handlePaymentOption("Pay 1 day", overlayItem)
-                    3 -> handlePaymentOption("Pay 1 month", overlayItem)
-                    4 -> binding.tvCredits.visibility = View.GONE
-                }
+            .setCancelable(true)
+            .setNegativeButton("Cancel") { dialog, which ->
+                dialog.dismiss()
             }
             .show()
     }
 
     private fun handlePaymentOption(option: String, overlayItem: OverlayItem) {
+        Log.d("MapFragment", "handlePaymentOption called")
         val calendar = Calendar.getInstance()
 
         when (option) {
@@ -177,7 +233,9 @@ class MapFragment : Fragment() {
                 if (currentCredits.toInt() < 2)
                     showSnackBar("You don't have enough credits!")
                 else
+                    Log.d("MapFragment", "buy ticket called")
                     paymentFunction(1, overlayItem, calendar, 2)
+                Log.d("MapFragment", "remove credits called")
                 binding.tvCredits.visibility = View.GONE
             }
             "Pay 5h" -> {
@@ -186,6 +244,7 @@ class MapFragment : Fragment() {
                 else
                     paymentFunction(5, overlayItem, calendar, 4)
                 binding.tvCredits.visibility = View.GONE
+                observeRxJava()
             }
             "Pay 1 day" -> {
                 if (currentCredits.toInt() < 10)
@@ -245,6 +304,7 @@ class MapFragment : Fragment() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe() { tickets ->
                 ticketList = tickets
+                checkTicketDateExpiring()
             }
     }
 
@@ -301,6 +361,12 @@ class MapFragment : Fragment() {
         super.onDestroyView()
         if (::creditDisposable.isInitialized && !creditDisposable.isDisposed) {
             creditDisposable.dispose()
+        }
+        if (::userDisposable.isInitialized && !userDisposable.isDisposed) {
+            userDisposable.dispose()
+        }
+        if (::ticketsDisposable.isInitialized && !ticketsDisposable.isDisposed) {
+            ticketsDisposable.dispose()
         }
         _binding = null
     }
